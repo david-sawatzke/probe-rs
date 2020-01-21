@@ -1,5 +1,5 @@
 use crate::coresight::memory::MI;
-use crate::probe::{DebugProbeError, MasterProbe};
+use crate::probe::{DebugProbeError, Probe};
 use crate::target::{
     BasicRegisterAddresses, Core, CoreInformation, CoreRegister, CoreRegisterAddress,
 };
@@ -316,7 +316,7 @@ impl M4 {
 }
 
 impl Core for M4 {
-    fn wait_for_core_halted(&self, mi: &mut MasterProbe) -> Result<(), DebugProbeError> {
+    fn wait_for_core_halted(&self, mi: &mut Probe) -> Result<(), DebugProbeError> {
         // Wait until halted state is active again.
         for _ in 0..100 {
             let dhcsr_val = Dhcsr(mi.read32(Dhcsr::ADDRESS)?);
@@ -327,7 +327,7 @@ impl Core for M4 {
         Err(DebugProbeError::Timeout)
     }
 
-    fn core_halted(&self, mi: &mut MasterProbe) -> Result<bool, DebugProbeError> {
+    fn core_halted(&self, mi: &mut Probe) -> Result<bool, DebugProbeError> {
         // Wait until halted state is active again.
         let dhcsr_val = Dhcsr(mi.read32(Dhcsr::ADDRESS)?);
 
@@ -340,7 +340,7 @@ impl Core for M4 {
 
     fn read_core_reg(
         &self,
-        mi: &mut MasterProbe,
+        mi: &mut Probe,
         addr: CoreRegisterAddress,
     ) -> Result<u32, DebugProbeError> {
         // Write the DCRSR value to select the register we want to read.
@@ -357,7 +357,7 @@ impl Core for M4 {
 
     fn write_core_reg(
         &self,
-        mi: &mut MasterProbe,
+        mi: &mut Probe,
         addr: CoreRegisterAddress,
         value: u32,
     ) -> Result<(), DebugProbeError> {
@@ -375,7 +375,7 @@ impl Core for M4 {
         self.wait_for_core_register_transfer(mi)
     }
 
-    fn halt(&self, mi: &mut MasterProbe) -> Result<CoreInformation, DebugProbeError> {
+    fn halt(&self, mi: &mut Probe) -> Result<CoreInformation, DebugProbeError> {
         // TODO: Generic halt support
 
         let mut value = Dhcsr(0);
@@ -394,7 +394,7 @@ impl Core for M4 {
         Ok(CoreInformation { pc: pc_value })
     }
 
-    fn run(&self, mi: &mut MasterProbe) -> Result<(), DebugProbeError> {
+    fn run(&self, mi: &mut Probe) -> Result<(), DebugProbeError> {
         let mut value = Dhcsr(0);
         value.set_c_halt(false);
         value.set_c_debugen(true);
@@ -403,7 +403,7 @@ impl Core for M4 {
         mi.write32(Dhcsr::ADDRESS, value.into()).map_err(Into::into)
     }
 
-    fn step(&self, mi: &mut MasterProbe) -> Result<CoreInformation, DebugProbeError> {
+    fn step(&self, mi: &mut Probe) -> Result<CoreInformation, DebugProbeError> {
         let mut value = Dhcsr(0);
         // Leave halted state.
         // Step one instruction.
@@ -424,7 +424,7 @@ impl Core for M4 {
         Ok(CoreInformation { pc: pc_value })
     }
 
-    fn reset(&self, mi: &mut MasterProbe) -> Result<(), DebugProbeError> {
+    fn reset(&self, mi: &mut Probe) -> Result<(), DebugProbeError> {
         // Set THE AIRCR.SYSRESETREQ control bit to 1 to request a reset. (ARM V6 ARM, B1.5.16)
         let mut value = Aircr(0);
         value.vectkey();
@@ -435,7 +435,7 @@ impl Core for M4 {
         Ok(())
     }
 
-    fn reset_and_halt(&self, mi: &mut MasterProbe) -> Result<CoreInformation, DebugProbeError> {
+    fn reset_and_halt(&self, mi: &mut Probe) -> Result<CoreInformation, DebugProbeError> {
         // Ensure debug mode is enabled
         let dhcsr_val = Dhcsr(mi.read32(Dhcsr::ADDRESS)?);
         if !dhcsr_val.c_debugen() {
@@ -473,7 +473,7 @@ impl Core for M4 {
         Ok(CoreInformation { pc: pc_value })
     }
 
-    fn get_available_breakpoint_units(&self, mi: &mut MasterProbe) -> Result<u32, DebugProbeError> {
+    fn get_available_breakpoint_units(&self, mi: &mut Probe) -> Result<u32, DebugProbeError> {
         let raw_val = mi.read32(FpCtrl::ADDRESS)?;
 
         let reg = FpCtrl::from(raw_val);
@@ -487,7 +487,7 @@ impl Core for M4 {
         }
     }
 
-    fn enable_breakpoints(&self, mi: &mut MasterProbe, state: bool) -> Result<(), DebugProbeError> {
+    fn enable_breakpoints(&self, mi: &mut Probe, state: bool) -> Result<(), DebugProbeError> {
         let mut val = FpCtrl::from(0);
         val.set_key(true);
         val.set_enable(state);
@@ -498,7 +498,7 @@ impl Core for M4 {
 
     fn set_breakpoint(
         &self,
-        mi: &mut MasterProbe,
+        mi: &mut Probe,
         bp_unit_index: usize,
         addr: u32,
     ) -> Result<(), DebugProbeError> {
@@ -513,7 +513,7 @@ impl Core for M4 {
 
     fn read_block8(
         &self,
-        mi: &mut MasterProbe,
+        mi: &mut Probe,
         address: u32,
         data: &mut [u8],
     ) -> Result<(), DebugProbeError> {
@@ -526,7 +526,7 @@ impl Core for M4 {
 
     fn clear_breakpoint(
         &self,
-        mi: &mut MasterProbe,
+        mi: &mut Probe,
         bp_unit_index: usize,
     ) -> Result<(), DebugProbeError> {
         let mut val = FpCompX::from(0);

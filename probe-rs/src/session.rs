@@ -1,9 +1,9 @@
 use crate::config::target::Target;
-use crate::probe::{DebugProbeError, MasterProbe};
+use crate::probe::{DebugProbeError, Probe};
 
 pub struct Session {
     pub target: Target,
-    pub probe: MasterProbe,
+    pub probe: Probe,
 
     hw_breakpoint_enabled: bool,
     active_breakpoints: Vec<Breakpoint>,
@@ -11,7 +11,7 @@ pub struct Session {
 
 impl Session {
     /// Open a new session with a given debug target
-    pub fn new(target: Target, probe: MasterProbe) -> Self {
+    pub fn new(target: Target, probe: Probe) -> Self {
         Self {
             target,
             probe,

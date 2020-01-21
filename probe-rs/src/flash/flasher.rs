@@ -6,7 +6,7 @@ use crate::config::{
     target::Target,
 };
 use crate::coresight::{access_ports::AccessPortError, memory::MI};
-use crate::probe::{DebugProbeError, MasterProbe};
+use crate::probe::{DebugProbeError, Probe};
 
 pub trait Operation {
     fn operation() -> u32;
@@ -78,7 +78,7 @@ impl From<AccessPortError> for FlasherError {
 
 pub struct Flasher<'a> {
     target: &'a Target,
-    probe: &'a mut MasterProbe,
+    probe: &'a mut Probe,
     flash_algorithm: &'a FlashAlgorithm,
     region: &'a FlashRegion,
     double_buffering_supported: bool,
@@ -87,7 +87,7 @@ pub struct Flasher<'a> {
 impl<'a> Flasher<'a> {
     pub fn new(
         target: &'a Target,
-        probe: &'a mut MasterProbe,
+        probe: &'a mut Probe,
         flash_algorithm: &'a FlashAlgorithm,
         region: &'a FlashRegion,
     ) -> Self {
@@ -290,7 +290,7 @@ impl<'a> Flasher<'a> {
 
 pub struct ActiveFlasher<'a, O: Operation> {
     target: &'a Target,
-    probe: &'a mut MasterProbe,
+    probe: &'a mut Probe,
     flash_algorithm: &'a FlashAlgorithm,
     region: &'a FlashRegion,
     double_buffering_supported: bool,

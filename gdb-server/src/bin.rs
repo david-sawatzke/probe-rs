@@ -11,7 +11,7 @@ use structopt::StructOpt;
 
 use probe_rs::{
     config::registry::{Registry, SelectionStrategy},
-    probe::{daplink, stlink, DebugProbe, DebugProbeType, MasterProbe, WireProtocol},
+    probe::{daplink, stlink, DebugProbe, DebugProbeType, Probe, WireProtocol},
     session::Session,
     target::info::ChipInfo,
 };
@@ -68,14 +68,14 @@ fn main_try() -> Result<(), failure::Error> {
 
             link.attach(Some(WireProtocol::Swd))?;
 
-            MasterProbe::from_specific_probe(link)
+            Probe::from_specific_probe(link)
         }
         DebugProbeType::STLink => {
             let mut link = stlink::STLink::new_from_probe_info(&device)?;
 
             link.attach(Some(WireProtocol::Swd))?;
 
-            MasterProbe::from_specific_probe(link)
+            Probe::from_specific_probe(link)
         }
     };
 

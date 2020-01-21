@@ -1,7 +1,7 @@
 use probe_rs::{
     config::registry::{Registry, SelectionStrategy},
     coresight::memory::MI,
-    probe::MasterProbe,
+    probe::Probe,
     session::Session,
     target::info::ChipInfo,
 };
@@ -108,8 +108,8 @@ fn main() -> Result<(), &'static str> {
     Ok(())
 }
 
-fn open_probe(index: Option<usize>) -> Result<MasterProbe, &'static str> {
-    let list = MasterProbe::list_all();
+fn open_probe(index: Option<usize>) -> Result<Probe, &'static str> {
+    let list = Probe::list_all();
 
     let device = match index {
         Some(index) => list
@@ -125,7 +125,7 @@ fn open_probe(index: Option<usize>) -> Result<MasterProbe, &'static str> {
         }
     };
 
-    let probe = MasterProbe::from_probe_info(&device).map_err(|_| "Failed to open probe")?;
+    let probe = Probe::from_probe_info(&device).map_err(|_| "Failed to open probe")?;
 
     Ok(probe)
 }

@@ -6,7 +6,7 @@ use crate::coresight::{
     ap_access::{valid_access_ports, APAccess},
     memory::romtable::{CSComponent, CSComponentId, PeripheralID, RomTableError},
 };
-use crate::probe::{DebugProbeError, MasterProbe};
+use crate::probe::{DebugProbeError, Probe};
 use colored::*;
 use jep106::JEP106Code;
 use log::debug;
@@ -50,7 +50,7 @@ pub struct ChipInfo {
 }
 
 impl ChipInfo {
-    pub fn read_from_rom_table(probe: &mut MasterProbe) -> Result<Self, ReadError> {
+    pub fn read_from_rom_table(probe: &mut Probe) -> Result<Self, ReadError> {
         for access_port in valid_access_ports(probe) {
             let idr = probe.read_ap_register(access_port, IDR::default())?;
             debug!("{:#x?}", idr);

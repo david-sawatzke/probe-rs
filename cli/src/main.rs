@@ -9,7 +9,7 @@ use probe_rs::{
     coresight::memory::MI,
     debug::DebugInfo,
     flash::download::{download_file, Format},
-    probe::MasterProbe,
+    probe::Probe,
 };
 
 use capstone::{arch::arm::ArchMode, prelude::*, Capstone, Endian};
@@ -131,7 +131,7 @@ fn main() {
 }
 
 fn list_connected_devices() -> Result<(), CliError> {
-    let links = MasterProbe::list_all();
+    let links = Probe::list_all();
 
     if !links.is_empty() {
         println!("The following devices were found:");

@@ -5,7 +5,7 @@ use probe_rs::{
     cores::m0::FakeM0,
     coresight::access_ports::AccessPortError,
     flash::download::FileDownloadError,
-    probe::{DebugProbeError, FakeProbe, MasterProbe},
+    probe::{DebugProbeError, FakeProbe, Probe},
     session::Session,
     target::info::{self, ChipInfo},
 };
@@ -102,8 +102,8 @@ impl From<FileDownloadError> for CliError {
     }
 }
 
-pub(crate) fn open_probe(index: Option<usize>) -> Result<MasterProbe, CliError> {
-    let available_probes = MasterProbe::list_all();
+pub(crate) fn open_probe(index: Option<usize>) -> Result<Probe, CliError> {
+    let available_probes = Probe::list_all();
 
     let device = match index {
         Some(index) => available_probes.get(index).ok_or(CliError::UnableToOpenProbe(Some("Unable to open the specified probe. Use the 'list' subcommand to see all available probes.")))?,
@@ -117,7 +117,7 @@ pub(crate) fn open_probe(index: Option<usize>) -> Result<MasterProbe, CliError> 
         }
     };
 
-    let probe = MasterProbe::from_probe_info(&device)?;
+    let probe = Probe::from_probe_info(&device)?;
 
     Ok(probe)
 }
@@ -157,7 +157,7 @@ where
     let core = FakeM0::new(dump);
     let fake_probe = FakeProbe::new();
 
-    let probe = MasterProbe::from_specific_probe(Box::new(fake_probe));
+    let probe = Probe::from_specific_probe(Box::new(fake_probe));
 
     let strategy = if let Some(identifier) = &shared_options.target {
         SelectionStrategy::TargetIdentifier(identifier.into())

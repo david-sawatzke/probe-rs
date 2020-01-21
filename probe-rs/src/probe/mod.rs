@@ -116,7 +116,7 @@ pub trait DAPAccess {
     }
 }
 
-/// The MasterProbe struct is a generic wrapper over the different
+/// The Probe struct is a generic wrapper over the different
 /// probes supported.
 ///
 /// # Examples
@@ -124,22 +124,22 @@ pub trait DAPAccess {
 /// ## Open the first probe found
 ///
 /// The `list_all` and `from_probe_info` functions can be used
-/// to create a new `MasterProbe`::
+/// to create a new `Probe`::
 ///
 /// ```no_run
-/// use probe_rs::probe::MasterProbe;
+/// use probe_rs::probe::Probe;
 ///
-/// let probe_list = MasterProbe::list_all();
-/// let probe = MasterProbe::from_probe_info(&probe_list[0]);
+/// let probe_list = Probe::list_all();
+/// let probe = Probe::from_probe_info(&probe_list[0]);
 /// ```
 
-pub struct MasterProbe {
+pub struct Probe {
     actual_probe: Box<dyn DebugProbe>,
     current_apsel: u8,
     current_apbanksel: u8,
 }
 
-impl MasterProbe {
+impl Probe {
     /// Get a list of all debug probes found.
     /// This can be used to select the debug probe which
     /// should be used.
@@ -150,8 +150,8 @@ impl MasterProbe {
         list
     }
 
-    /// Create a `MasterProbe` from `DebugProbeInfo`. Use the
-    /// `MasterProbe::list_all()` function to get the information
+    /// Create a `Probe` from `DebugProbeInfo`. Use the
+    /// `Probe::list_all()` function to get the information
     /// about all probes available.
     pub fn from_probe_info(info: &DebugProbeInfo) -> Result<Self, DebugProbeError> {
         let probe = match info.probe_type {
@@ -160,14 +160,14 @@ impl MasterProbe {
 
                 dap_link.attach(Some(WireProtocol::Swd))?;
 
-                MasterProbe::from_specific_probe(dap_link)
+                Probe::from_specific_probe(dap_link)
             }
             DebugProbeType::STLink => {
                 let mut link = stlink::STLink::new_from_probe_info(info)?;
 
                 link.attach(Some(WireProtocol::Swd))?;
 
-                MasterProbe::from_specific_probe(link)
+                Probe::from_specific_probe(link)
             }
         };
 
@@ -175,7 +175,7 @@ impl MasterProbe {
     }
 
     pub fn from_specific_probe(probe: Box<dyn DebugProbe>) -> Self {
-        MasterProbe {
+        Probe {
             actual_probe: probe,
             current_apbanksel: 0,
             current_apsel: 0,
@@ -395,7 +395,7 @@ impl MasterProbe {
     }
 }
 
-impl<REGISTER> APAccess<MemoryAP, REGISTER> for MasterProbe
+impl<REGISTER> APAccess<MemoryAP, REGISTER> for Probe
 where
     REGISTER: APRegister<MemoryAP>,
 {
@@ -432,7 +432,7 @@ where
     }
 }
 
-impl<REGISTER> APAccess<GenericAP, REGISTER> for MasterProbe
+impl<REGISTER> APAccess<GenericAP, REGISTER> for Probe
 where
     REGISTER: APRegister<GenericAP>,
 {
@@ -473,7 +473,7 @@ where
     }
 }
 
-impl MI for MasterProbe {
+impl MI for Probe {
     fn read32(&mut self, address: u32) -> Result<u32, AccessPortError> {
         ADIMemoryInterface::new(0).read32(self, address)
     }
