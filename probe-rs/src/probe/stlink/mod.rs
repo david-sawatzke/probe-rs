@@ -456,3 +456,9 @@ pub(crate) enum StlinkError {
     #[error("USB endpoint not found.")]
     EndpointNotFound,
 }
+
+impl From<StlinkError> for DebugProbeError {
+    fn from(e: StlinkError) -> Self {
+        DebugProbeError::ProbeSpecificError(Box::new(e))
+    }
+}

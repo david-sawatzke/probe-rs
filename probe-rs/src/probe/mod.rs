@@ -62,12 +62,6 @@ pub enum DebugProbeError {
     AccessPortError(#[from] AccessPortError),
 }
 
-impl From<stlink::StlinkError> for DebugProbeError {
-    fn from(e: stlink::StlinkError) -> Self {
-        DebugProbeError::ProbeSpecificError(Box::new(e))
-    }
-}
-
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Port {
     DebugPort,
